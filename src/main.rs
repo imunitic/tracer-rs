@@ -1,4 +1,6 @@
 mod tuple;
+mod color;
+
 use tuple::Tuple;
 
 #[derive(Copy, Clone)]

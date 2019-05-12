@@ -1,11 +1,12 @@
 use std::ops::{Add, Sub, Mul};
 use float_cmp::ApproxEq;
+use std::cmp::PartialEq;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Color {
-	red: f64,
-	green: f64,
-	blue: f64
+	pub red: f64,
+	pub green: f64,
+	pub blue: f64
 }
 
 impl Color {
@@ -18,6 +19,14 @@ impl Color {
 	pub fn eq(self, rhs: Color) -> bool {
 		self.approx_eq(&rhs, Color::EPSILON, 0)
 	}
+}
+
+impl PartialEq for Color {
+    fn eq(&self, other: &Color) -> bool {
+        self.red.eq(&other.red) &&
+        self.green.eq(&other.green) &&
+        self.blue.eq(&other.blue)
+    }
 }
 
 impl ApproxEq for Color {

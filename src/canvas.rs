@@ -1,25 +1,36 @@
-use crate::color::Color;
-use nalgebra::{DMatrix};
+	use crate::color::Color;
+
 
 #[derive(Debug)]
 pub struct Canvas {
 	pub width: usize,
 	pub height: usize,
-	data: DMatrix<Color>
+	data: Vec<Vec<Color>>
 }
 
 impl Canvas {
-	pub fn new(width: usize, height: usize) -> Canvas {
-		let m = DMatrix::from_fn(width, height, |_i, _j| Color::new(0.0, 0.0, 0.0));
-		Canvas{width, height, data: m}
+	pub fn new(columns: usize, rows: usize) -> Canvas {
+		Canvas::from_fn(columns, rows, &|_c, _r| Color::new(0.0, 0.0, 0.0))
 	}
 
-	pub fn write_pixel(&mut self, x: usize, y: usize, color: Color ) {
-		self.data[(x, y)] = color;
+	pub fn from_fn(width: usize, height: usize, f: &Fn(usize, usize) -> Color) -> Canvas {
+		let mut data: Vec<Vec<Color>> = Default::default();
+		for h in 0..height {
+			let mut row: Vec<Color> = Default::default(); 
+			for w in 0..width {
+				row.push(f(w, h));
+			}
+			data.push(row);
+		}
+		Canvas{width, height, data}
 	}
 
-	pub fn pixel_at(&self, x: usize, y: usize) -> Color {
-		self.data[(x, y)]
+	pub fn write_pixel(&mut self, column: usize, row: usize, color: Color ) {
+		self.data[row][column] = color;
+	}
+
+	pub fn pixel_at(&self, column: usize, row: usize) -> Color {
+		self.data[row][column]
 	}
 
 	pub fn to_ppm(&self) -> String {

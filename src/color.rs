@@ -19,6 +19,10 @@ impl Color {
 	pub fn eq(self, rhs: Color) -> bool {
 		self.approx_eq(&rhs, Color::EPSILON, 0)
 	}
+
+	pub fn default() -> Color {
+		Color::new(0.0, 0.0, 0.0)
+	}
 }
 
 impl PartialEq for Color {

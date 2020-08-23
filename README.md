@@ -1,1 +1,1 @@
-My code following the book [http://raytracerchallenge.com](The Ray Tracer Challenge)
+My code following the book [The Ray Tracer Challenge](http://raytracerchallenge.com)

@@ -1,4 +1,4 @@
-use float_cmp::ApproxEq;
+use float_cmp::{ApproxEq, F64Margin, approx_eq};
 use std::f64;
 use std::ops::{Add, Sub, Neg, Mul, Div};
 
@@ -26,7 +26,7 @@ impl Tuple {
     }
 
     pub fn eq(self, other: Tuple) -> bool {
-        self.approx_eq(&other, Tuple::EPSILON, 0)
+        approx_eq!(Self, self, other, epsilon=Tuple::EPSILON)
     }
 
     pub fn magnitude(self) -> f64 {
@@ -110,17 +110,18 @@ impl Div<f64> for Tuple {
 }
 
 impl ApproxEq for Tuple {
-    type Flt = f64;
+    type Margin = F64Margin;
 
-    fn approx_eq(&self, other: &Tuple, epsilon: f64, ulps: i64) -> bool {
+    fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
+        let margin = margin.into();
         (self.x == other.x &&
         self.y == other.y &&
         self.z == other.z &&
         self.w == other.w) ||
-        (self.x.approx_eq(&other.x, epsilon, ulps) &&
-        self.y.approx_eq(&other.y, epsilon, ulps) &&
-        self.z.approx_eq(&other.z, epsilon, ulps) &&
-        self.w.approx_eq(&other.w, epsilon, ulps))
+        (self.x.approx_eq(other.x, margin) &&
+        self.y.approx_eq(other.y, margin) &&
+        self.z.approx_eq(other.z, margin) &&
+        self.w.approx_eq(other.w, margin))
     }
 }
 
@@ -128,7 +129,6 @@ impl ApproxEq for Tuple {
 #[cfg(test)]
 mod tests {
     use crate::tuple::Tuple;
-    use float_cmp::ApproxEq;
     use std::f64;
 
 
@@ -142,37 +142,37 @@ mod tests {
     #[test]
     fn test_tuple_as_point() {
         let t = Tuple::tuple(4.3, -4.2, 3.1, 1.0);
-        assert!(t.x.approx_eq(&4.3, Tuple::EPSILON, 0));
-        assert!(t.y.approx_eq(&-4.2, Tuple::EPSILON, 0));
-        assert!(t.z.approx_eq(&3.1, Tuple::EPSILON, 0));
-        assert!(t.w.approx_eq(&1.0, Tuple::EPSILON, 0));
+        assert!(t.x.eq(&4.3));
+        assert!(t.y.eq(&-4.2));
+        assert!(t.z.eq(&3.1));
+        assert!(t.w.eq(&1.0));
     }
 
     #[test]
     fn test_tuple_as_vector() {
         let t = Tuple::tuple(4.3, -4.2, 3.1, 0.0);
-        assert!(t.x.approx_eq(&4.3, Tuple::EPSILON, 0));
-        assert!(t.y.approx_eq(&-4.2, Tuple::EPSILON, 0));
-        assert!(t.z.approx_eq(&3.1, Tuple::EPSILON, 0));
-        assert!(t.w.approx_eq(&0.0, Tuple::EPSILON, 0));
+        assert!(t.x.eq(&4.3));
+        assert!(t.y.eq(&-4.2));
+        assert!(t.z.eq(&3.1));
+        assert!(t.w.eq(&0.0));
     }
 
     #[test]
     fn test_point_fn_creates_a_point() {
         let t = Tuple::point(4.3, -4.2, 3.1);
-        assert!(t.x.approx_eq(&4.3, Tuple::EPSILON, 0));
-        assert!(t.y.approx_eq(&-4.2, Tuple::EPSILON, 0));
-        assert!(t.z.approx_eq(&3.1, Tuple::EPSILON, 0));
-        assert!(t.w.approx_eq(&1.0, Tuple::EPSILON, 0));
+        assert!(t.x.eq(&4.3));
+        assert!(t.y.eq(&-4.2));
+        assert!(t.z.eq(&3.1));
+        assert!(t.w.eq(&1.0));
     }
 
     #[test]
     fn test_vector_fn_creates_a_vector() {
         let t = Tuple::vector(4.3, -4.2, 3.1);
-        assert!(t.x.approx_eq(&4.3, Tuple::EPSILON, 0));
-        assert!(t.y.approx_eq(&-4.2, Tuple::EPSILON, 0));
-        assert!(t.z.approx_eq(&3.1, Tuple::EPSILON, 0));
-        assert!(t.w.approx_eq(&0.0, Tuple::EPSILON, 0));
+        assert!(t.x.eq(&4.3));
+        assert!(t.y.eq(&-4.2));
+        assert!(t.z.eq(&3.1));
+        assert!(t.w.eq(&0.0));
     }
 
     #[test]
@@ -253,21 +253,21 @@ mod tests {
     #[test]
     fn test_magnitude_of_tuple() {
         let t1 = Tuple::vector(1.0, 0.0, 0.0);
-        assert!(t1.magnitude().approx_eq(&1.0, Tuple::EPSILON, 0));
+        assert!(t1.magnitude().eq(&1.0));
 
         let t2 = Tuple::vector(0.0, 1.0, 0.0);
-        assert!(t2.magnitude().approx_eq(&1.0, Tuple::EPSILON, 0));
+        assert!(t2.magnitude().eq(&1.0));
 
         let t3 = Tuple::vector(0.0, 0.0, 1.0);
-        assert!(t3.magnitude().approx_eq(&1.0, Tuple::EPSILON, 0));
+        assert!(t3.magnitude().eq(&1.0));
 
         let t4 = Tuple::vector(1.0, 2.0, 3.0);
         let r4 = (14.0 as f64).sqrt();
-        assert!(t4.magnitude().approx_eq(&r4, Tuple::EPSILON, 0));
+        assert!(t4.magnitude().eq(&r4));
 
         let t5 = Tuple::vector(-1.0, -2.0, -3.0);
         let r5 = (14.0 as f64).sqrt();
-        assert!(t5.magnitude().approx_eq(&r5, Tuple::EPSILON, 0));
+        assert!(t5.magnitude().eq(&r5));
     }
 
     #[test]
@@ -292,7 +292,7 @@ mod tests {
         let result = t1.dot(t2);
         let expected = 20.0;
 
-        assert!(result.approx_eq(&expected, Tuple::EPSILON, 0));
+        assert!(result.eq(&expected));
     }
 
     #[test]

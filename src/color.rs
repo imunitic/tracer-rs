@@ -1,5 +1,5 @@
 use std::ops::{Add, Sub, Mul};
-use float_cmp::ApproxEq;
+use float_cmp::{ApproxEq, F64Margin, approx_eq};
 use std::cmp::PartialEq;
 
 #[derive(Copy, Clone, Debug)]
@@ -17,7 +17,7 @@ impl Color {
 	}
 
 	pub fn eq(self, rhs: Color) -> bool {
-		self.approx_eq(&rhs, Color::EPSILON, 0)
+        approx_eq!(Self, self, rhs, epsilon=Color::EPSILON)
 	}
 
 	pub fn default() -> Color {
@@ -34,15 +34,16 @@ impl PartialEq for Color {
 }
 
 impl ApproxEq for Color {
-    type Flt = f64;
+    type Margin = F64Margin;
 
-    fn approx_eq(&self, other: &Color, epsilon: f64, ulps: i64) -> bool {
+    fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
+        let margin = margin.into();
         (self.red == other.red &&
         self.green == other.green &&
         self.blue == other.blue) ||
-        (self.red.approx_eq(&other.red, epsilon, ulps) &&
-        self.green.approx_eq(&other.green, epsilon, ulps) &&
-        self.blue.approx_eq(&other.blue, epsilon, ulps))
+        (self.red.approx_eq(other.red, margin) &&
+        self.green.approx_eq(other.green, margin) &&
+        self.blue.approx_eq(other.blue, margin))
     }
 }
 
@@ -88,15 +89,15 @@ impl Mul<Color> for Color {
 #[cfg(test)]
 mod tests {
 	use crate::color::Color;
-	use float_cmp::ApproxEq;
+    use float_cmp::approx_eq;
     
 
 	#[test]
 	fn test_color() {
 		let c = Color::new(-0.5, 0.4, 1.7);
-		assert!(c.red.approx_eq(&-0.5, Color::EPSILON, 0));
-		assert!(c.green.approx_eq(&0.4, Color::EPSILON, 0));
-		assert!(c.blue.approx_eq(&1.7, Color::EPSILON, 0));
+		assert!(approx_eq!(f64, c.red, -0.5, epsilon=Color::EPSILON));
+		assert!(approx_eq!(f64, c.green, 0.4, epsilon=Color::EPSILON));
+		assert!(approx_eq!(f64, c.blue, 1.7, epsilon=Color::EPSILON));
 	}
 
 	#[test]
